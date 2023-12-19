@@ -1,10 +1,11 @@
+import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { client } from '../app';
-import { createJwtToken } from '../utils/jwtToken';
 
-export const register = async (req: any, res: any) => {
+//register user
+export const register = async (req: Request, res: Response) => {
 	try {
 		//validation check
 		const errors = validationResult(req);
@@ -35,7 +36,7 @@ export const register = async (req: any, res: any) => {
 
 		const user = await client.user.create({ data: doc });
 
-		const token = createJwtToken({ id: user.id }, 'secretkey', '30d');
+		const token = jwt.sign({ id: user.id }, 'secretkey', { expiresIn: '30d' });
 
 		const { passwordHash, ...userData } = user;
 		res.status(200).json({ ...userData, token });
@@ -45,7 +46,8 @@ export const register = async (req: any, res: any) => {
 	}
 };
 
-export const login = async (req: any, res: any) => {
+//login user
+export const login = async (req: Request, res: Response) => {
 	const errRes = () => {
 		res.status(403).json({ error: 'Неверный логин или пароль' });
 	};
@@ -62,7 +64,7 @@ export const login = async (req: any, res: any) => {
 		);
 		if (!isValidPassword) return errRes();
 
-		const token = createJwtToken({ id: user.id }, 'secretkey', '30d');
+		const token = jwt.sign({ id: user.id }, 'secretkey', { expiresIn: '30d' });
 
 		const { passwordHash, ...userData } = user;
 		res.status(200).json({ ...userData, token });
@@ -71,3 +73,5 @@ export const login = async (req: any, res: any) => {
 		res.status(500).json({ message: 'Ошибка авторизации' });
 	}
 };
+
+export const auth = () => {};
