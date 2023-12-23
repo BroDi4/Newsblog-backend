@@ -74,4 +74,17 @@ export const login = async (req: Request, res: Response) => {
 	}
 };
 
-export const auth = () => {};
+export const auth = async (req: Request, res: Response) => {
+	try {
+		const user = await client.user.findUnique({
+			where: { id: req.body.userId },
+		});
+		if (!user) return res.status(403).json({ message: 'Нет доступа' });
+		const { passwordHash, ...userData } = user;
+
+		res.status(200).json({ ...userData });
+	} catch (err) {
+		console.log(err);
+		res.status(500).json({ message: 'Ошибка авторизации' });
+	}
+};
