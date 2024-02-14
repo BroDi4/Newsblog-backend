@@ -3,8 +3,10 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 
 import * as userController from './controllers/userController';
-import { registerValidation } from './utils/validations';
-import checkAuth from './utils/checkAuth';
+import { registerValidation } from './middleware/validations';
+import checkAuth from './middleware/checkAuth';
+import multer from 'multer';
+import { avatarStorage } from './middleware/multer';
 
 const app = express();
 const port = 5000;
@@ -13,7 +15,14 @@ export const client = new PrismaClient();
 app.use(express.json());
 app.use(cors());
 
-app.post('/user/register', registerValidation, userController.register);
+const avatarUpload = multer({ storage: avatarStorage });
+
+app.post(
+	'/user/register',
+	avatarUpload.single('avatar'),
+	registerValidation,
+	userController.register
+);
 app.post('/user/login', userController.login);
 app.get('/user/auth', checkAuth, userController.auth);
 
