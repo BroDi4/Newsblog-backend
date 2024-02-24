@@ -14,6 +14,7 @@ export const client = new PrismaClient();
 
 app.use(express.json());
 app.use(cors());
+app.use('/uploads/useravatar', express.static('uploads/useravatar'));
 
 const avatarUpload = multer({ storage: avatarStorage });
 
